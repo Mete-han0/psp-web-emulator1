@@ -39,7 +39,8 @@ The build also hardcodes SIMD128, so there is no non-SIMD fallback path.
 ## How games are supplied
 
 This host serves no game images. `web/library.json` describes games and where
-their images come from; the Download button opens that source page in a new tab.
+their images come from; the Download button opens that source page in the same
+tab, scrolled to the game's row and highlighted.
 
 To play, supply your own file:
 
@@ -95,10 +96,12 @@ Download deliberately does **not** open in a new tab. The fragment is only
 honoured in a focused tab, so a background tab shows the listing at the top with
 nothing highlighted, which defeats the button.
 
-Verified in Chrome: NBA 2K13, WWE All Stars, Crisis Core, FFT and Myst all land
-with the row scrolled into view. Grand Theft Auto's row does not match reliably
-(0/3) despite matching exactly in the DOM -- so if GTA ever needs to jump
-reliably, the row text itself is the thing to look at first.
+Verified in Chrome (focused tab, one run per entry): every entry lands with its
+row scrolled into view. Four rows needed a short `sourceFragment` because their
+full filenames contain " - ", which never matches: GTA ("Liberty City
+Stories"), FIFA '07 ("FIFA '07"), FFT ("War of the Lions") and Crisis Core
+("Crisis Core"). The other six archive entries use the full filename, which
+matches -- including names with apostrophes, "!" and parentheses.
 
 ## Notes
 

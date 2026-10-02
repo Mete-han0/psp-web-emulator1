@@ -238,10 +238,16 @@ Playing straight from the file the user already has costs them nothing.
 Entry fields:
 
 - `source` — page to visit to obtain the image. `Download` opens it.
-- `sourceText` — optional. Appended as a `#:~:text=` Text Fragment so the browser
-  scrolls to and highlights that row in a long index (Chrome 89+/Safari 16.1+;
-  degrades to the plain page). Match a punctuation-free substring: Archive.org
-  renders some dashes as en-dashes, and a miss only loses the highlight.
+- `sourceFile` — exact filename of the row in that collection.
+- `sourceText` — same filename, kept as data for the listing fallback.
+- `sourceFragment` — optional override for the `#:~:text=` Text Fragment
+  (`Download` jumps to and highlights that row in a long index; Chrome 89+/
+  Safari 16.1+, degrades to the plain page). Needed for any row whose full name
+  contains " - ", which never matches (verified: full-name fragments with it
+  leave scrollY at 0; without it they scroll). Keep the override a short,
+  punctuation-light substring that is unique across the listing,
+  case-insensitively -- a miss only loses the highlight, a non-unique hit jumps
+  to the wrong row.
 - `files` — for directory games, the member names expected in the user's folder.
   PPSSPP boots a folder containing `EBOOT.PBP` natively (`Core/Loaders.cpp`,
   `PSP_PBP_DIRECTORY`), so no ISO/CSO packing is needed.
