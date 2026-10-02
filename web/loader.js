@@ -606,19 +606,29 @@ async function playSessionFiles(entry, files) {
 // sourceText is kept as the exact filename, which is what makes the direct URL
 // correct and is worth having as data even where the fragment is unreliable.
 
+// Download opens the collection's listing page and jumps to the row, rather than
+// fetching the file. The Text Fragment (#:~:text=) is what does the jumping: the
+// browser scrolls the match into view and highlights it. Supported in Chrome 89+
+// and Safari 16.1+; elsewhere the link still lands on a working listing.
+//
+// One behaviour worth knowing, because it looks like a bug and is not: the
+// fragment is honoured only while the tab has focus. Opening the link into a new
+// background tab leaves the listing at scroll position 0 with nothing highlighted
+// -- verified in Chrome, where the same URL in a focused tab scrolls correctly.
+// So the link deliberately does NOT open in a new tab. One tab, focused, the row
+// visible and highlighted, which is what this button is for.
+//
 // sourceFile must be the COMPLETE filename, not a substring. Archive.org matches
 // direct URLs exactly, so "Liberty City Stories (USA).cso" is a 404 -- the row is
 // really "Grand Theft Auto - Liberty City Stories (USA).cso". A Text Fragment
-// tolerated a partial match, which is exactly why the truncation went unnoticed
-// while the fragment approach was in use.
+// tolerated a partial match, which is exactly why the truncation went unnoticed.
 function sourceUrl(g) {
   const base = g.source || '';
-  if (g.sourceFile) {
-    const dir = base.endsWith('/') ? base : base + '/';
-    return dir + encodeURIComponent(g.sourceFile);
-  }
-  if (!g.sourceText) return base;
-  return base + '#:~:text=' + encodeURIComponent(g.sourceText);
+  // sourceFile is the authoritative row name; fall back to sourceText for
+  // entries that were written before sourceFile existed.
+  const row = g.sourceFile || g.sourceText;
+  if (!row) return base;
+  return base + '#:~:text=' + encodeURIComponent(row);
 }
 
 // Pull files out of a drop, walking directories when the browser exposes them.
@@ -728,7 +738,9 @@ function tileActions(g, tile) {
     const dl = document.createElement('a');
     dl.className = 'act';
     dl.href = sourceUrl(g);
-    dl.target = '_blank';
+    // No target="_blank". The Text Fragment is only honoured in a focused tab,
+    // so a background tab would open the listing unscrolled and unhighlighted,
+    // which defeats the entire point of this button. See sourceUrl().
     dl.rel = 'noopener noreferrer';
     dl.innerHTML = '<span>' + T('lib.download') + '</span>';
     dl.title = g.source;

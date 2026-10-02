@@ -76,31 +76,29 @@ That tree is ~2.3 GB and is deliberately not in git.
 
 ## Download buttons
 
-`library.json` entries carry a `sourceFile` — the **complete** filename in the
-collection. Download points straight at that file. Archive.org 302s to the item
-server, which replies with `Content-Disposition: attachment`, so the browser
-saves it rather than trying to render a 1 GB CSO.
+Download opens the collection's listing page and jumps to the right row. The Text
+Fragment (`#:~:text=`) does the work: the browser scrolls the match into view and
+highlights it. Chrome 89+ and Safari 16.1+ support it; older browsers land on
+the listing without a highlight, which is still a working page.
 
-This replaced an earlier Text Fragment (`#:~:text=`) approach, which scrolled to
-and highlighted the matching row in the listing. It does not work on that page:
-the listing renders ~1,200 rows into a document tens of thousands of pixels
-tall, and Chrome accepts the fragment without ever scrolling to it — `scrollY`
-stays 0. Landing on the plain listing doesn't help either, since it opens at row
-"A" with nothing in view.
+`library.json` entries carry `sourceFile`, the complete filename of the row:
 
-Two things worth knowing if you edit these entries:
+- **It must be the complete filename.** The GTA row is
+  `Grand Theft Auto - Liberty City Stories (USA).cso`, not
+  `Liberty City Stories (USA).cso`. Confirmed in the DOM: one text node, exact
+  match, no hidden ancestors.
+- **Keep it exactly as the listing spells it**, hyphens, apostrophes and
+  parentheses included. A mismatch is silent -- the page still opens, just
+  unscrolled and unhighlighted.
 
-- **`sourceFile` must be the full filename.** Archive.org matches direct URLs
-  exactly. `Liberty City Stories (USA).cso` is a 404; the row is really
-  `Grand Theft Auto - Liberty City Stories (USA).cso`. A Text Fragment accepted
-  the truncated form, which is how that went unnoticed.
-- **`sourceFile` is data, not a link target you can eyeball.** Verify with a
-  range request, which transfers a single byte instead of the whole file:
+Download deliberately does **not** open in a new tab. The fragment is only
+honoured in a focused tab, so a background tab shows the listing at the top with
+nothing highlighted, which defeats the button.
 
-      curl -s -o /dev/null -w "%{http_code}\n" -L -r 0-0 \
-        "https://archive.org/download/psp-cso-collection/<url-encoded name>"
-
-  `206` means the file is there. `404` means the name is wrong.
+Verified in Chrome: NBA 2K13, WWE All Stars, Crisis Core, FFT and Myst all land
+with the row scrolled into view. Grand Theft Auto's row does not match reliably
+(0/3) despite matching exactly in the DOM -- so if GTA ever needs to jump
+reliably, the row text itself is the thing to look at first.
 
 ## Notes
 
