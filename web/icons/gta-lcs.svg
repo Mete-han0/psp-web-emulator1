@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"
+     role="img" aria-label="Grand Theft Auto: Liberty City Stories">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#0d1a33"/>
+      <stop offset=".38" stop-color="#3a2a5a"/>
+      <stop offset=".68" stop-color="#b85a4e"/>
+      <stop offset=".88" stop-color="#ef9a52"/>
+      <stop offset="1"   stop-color="#f7c173"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".5" cy=".5" r=".5">
+      <stop offset="0"   stop-color="#fff1c6"/>
+      <stop offset=".55" stop-color="#ffd489" stop-opacity=".85"/>
+      <stop offset="1"   stop-color="#ffb45e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="street" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a0f15"/>
+      <stop offset="1" stop-color="#04070a"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#ffe9b0" stop-opacity=".5"/>
+      <stop offset="1"   stop-color="#ffe9b0" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- sunset sky -->
+  <rect width="400" height="300" fill="url(#sky)"/>
+
+  <!-- sun, sitting low and partly behind the skyline -->
+  <circle cx="248" cy="214" r="74" fill="url(#sun)"/>
+  <circle cx="248" cy="214" r="34" fill="#ffe7ab"/>
+
+  <!-- helicopter with a searchlight -->
+  <g fill="#080c12">
+    <rect x="52" y="46" width="54" height="4" rx="2"/>
+    <rect x="77" y="48" width="3" height="8"/>
+    <ellipse cx="79" cy="60" rx="14" ry="7.5"/>
+    <path d="M92 57 L116 51 L117 56 L93 64 Z"/>
+    <rect x="113" y="44" width="2.5" height="12"/>
+    <rect x="66" y="67" width="26" height="2.5" rx="1.2"/>
+    <rect x="69" y="62" width="2.5" height="6"/>
+    <rect x="87" y="62" width="2.5" height="6"/>
+  </g>
+  <path d="M79 67 L107 152 L51 152 Z" fill="url(#beam)"/>
+
+  <!-- skyline -->
+  <g fill="#070b11">
+    <rect x="-4"  y="198" width="46"  height="110"/>
+    <rect x="46"  y="226" width="30"  height="82"/>
+    <rect x="80"  y="178" width="37"  height="130"/>
+    <rect x="121" y="212" width="27"  height="96"/>
+    <rect x="152" y="130" width="46"  height="178"/>
+    <rect x="202" y="190" width="34"  height="118"/>
+    <rect x="240" y="218" width="28"  height="90"/>
+    <rect x="272" y="162" width="41"  height="146"/>
+    <rect x="317" y="206" width="30"  height="102"/>
+    <rect x="351" y="182" width="53"  height="126"/>
+    <!-- setback on the tall tower -->
+    <rect x="164" y="112" width="22" height="20"/>
+    <rect x="173" y="80"  width="4"  height="34"/>
+    <circle cx="175" cy="78" r="3.5" fill="#ff5f5f"/>
+  </g>
+
+  <!-- lit windows -->
+  <g fill="#ffcf7a">
+    <g opacity=".9">
+      <rect x="88"  y="190" width="6" height="9"/>
+      <rect x="100" y="190" width="6" height="9"/>
+      <rect x="88"  y="212" width="6" height="9"/>
+      <rect x="164" y="144" width="7" height="10"/>
+      <rect x="178" y="144" width="7" height="10"/>
+      <rect x="164" y="170" width="7" height="10"/>
+      <rect x="282" y="176" width="6" height="9"/>
+      <rect x="296" y="176" width="6" height="9"/>
+      <rect x="360" y="196" width="7" height="9"/>
+    </g>
+    <g opacity=".55">
+      <rect x="4"   y="210" width="6" height="9"/>
+      <rect x="18"  y="210" width="6" height="9"/>
+      <rect x="4"   y="236" width="6" height="9"/>
+      <rect x="54"  y="238" width="6" height="9"/>
+      <rect x="100" y="238" width="6" height="9"/>
+      <rect x="128" y="226" width="6" height="9"/>
+      <rect x="178" y="200" width="7" height="10"/>
+      <rect x="210" y="204" width="6" height="9"/>
+      <rect x="248" y="230" width="6" height="9"/>
+      <rect x="282" y="216" width="6" height="9"/>
+      <rect x="326" y="220" width="6" height="9"/>
+      <rect x="374" y="216" width="7" height="9"/>
+      <rect x="360" y="244" width="7" height="9"/>
+      <rect x="164" y="240" width="7" height="10"/>
+      <rect x="90"  y="266" width="6" height="9"/>
+      <rect x="216" y="256" width="6" height="9"/>
+      <rect x="290" y="256" width="6" height="9"/>
+      <rect x="24"  y="266" width="6" height="9"/>
+      <rect x="330" y="264" width="6" height="9"/>
+    </g>
+  </g>
+
+  <!-- street in the foreground -->
+  <rect x="0" y="276" width="400" height="24" fill="url(#street)"/>
+  <g fill="#f7c173" opacity=".55">
+    <rect x="14"  y="287" width="26" height="3" rx="1.5"/>
+    <rect x="70"  y="287" width="26" height="3" rx="1.5"/>
+    <rect x="126" y="287" width="26" height="3" rx="1.5"/>
+    <rect x="182" y="287" width="26" height="3" rx="1.5"/>
+    <rect x="238" y="287" width="26" height="3" rx="1.5"/>
+    <rect x="294" y="287" width="26" height="3" rx="1.5"/>
+    <rect x="350" y="287" width="26" height="3" rx="1.5"/>
+  </g>
+</svg>

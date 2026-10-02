@@ -1,0 +1,50 @@
+{
+  "//": [
+    "Library manifest for the PPSSPP web front end.",
+    "",
+    "IMPORTANT: this host serves NO game images. Nothing here is a playable file --",
+    "every entry describes a game and where its images come from, and the user",
+    "supplies their own copy.",
+    "",
+    "Two fields per entry:",
+    "",
+    "  source        - page to visit to obtain the image. The Download button",
+    "                  opens it in a new tab. Nothing is fetched by this site.",
+    "  files         - for multi-file ('directory game') layouts, the member names",
+    "                  expected inside the user's supplied folder.",
+    "",
+    "Adding a copy: the user drags the file onto the tile, or presses Play and",
+    "picks it. It is read into memory for that session and discarded afterwards.",
+    "",
+    "NOTHING IS STORED -- not on this server and not in the browser. An earlier",
+    "version cached the picked image in OPFS, which meant the browser quietly held",
+    "hundreds of megabytes with no obvious way to see or reclaim it. Playing",
+    "straight from the file the user already has costs them nothing.",
+    "",
+    "Consequence: the file must be picked again after a reload. That is the",
+    "deliberate trade."
+  ],
+
+  "games": [
+    {
+      "id": "gta-lcs",
+      "title": "Grand Theft Auto: Liberty City Stories",
+      "subtitle": "USA",
+      "badge": "PSP",
+      "icon": "icons/gta-lcs.svg",
+      "source": "https://archive.org/download/psp-cso-collection/",
+      "sourceText": "Liberty City Stories (USA).cso",
+      "notes": "No copy is served here. Download points at the source; supply your own image via Add file or drag-and-drop to play."
+    },
+    {
+      "id": "cavestory",
+      "title": "Cave Story",
+      "subtitle": "Doukutsu Monogatari · homebrew port",
+      "badge": "FREE",
+      "source": "https://www.cavestory.one/downloads/",
+
+      "files": ["EBOOT.PBP", "data.csz"],
+      "notes": "Freeware platformer by Studio Pixel, PSP port by ufo_z. A directory game: add the folder containing EBOOT.PBP and data.csz."
+    }
+  ]
+}

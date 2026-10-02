@@ -1,0 +1,23 @@
+# Cloudflare Pages alternative to netlify.toml.
+#
+# Cloudflare Pages can also set COOP/COEP, so it is a valid alternative to
+# Netlify. Use ONE of these two files, not both.
+#
+#   Dashboard: Workers & Pages -> Create -> Pages -> Upload assets
+#   Build output directory: web
+#
+# The headers below are the part that matters. GitHub Pages cannot serve these
+# at all -- a deploy there will load and then silently fail to boot.
+
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+
+/PPSSPPSDL.wasm
+  Content-Type: application/wasm
+
+/PPSSPPSDL.data
+  Content-Type: application/octet-stream
+
+/games/*
+  Cache-Control: public, max-age=31536000, immutable

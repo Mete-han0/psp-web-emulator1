@@ -1,0 +1,49 @@
+# Netlify deployment for the PPSSPP web build.
+#
+# The critical part is [build.environment] -> headers below. The wasm build is
+# compiled with -pthread, so it needs SharedArrayBuffer, which browsers only
+# expose to cross-origin-isolated documents. Without these two headers the page
+# loads but never boots the emulator.
+#
+# Note: GitHub Pages cannot serve these headers, so a Pages deploy will appear
+# to work and then do nothing. Netlify and Cloudflare Pages both can.
+
+[build]
+  publish = "web"
+  command = "echo 'Prebuilt wasm in web/ — nothing to build'"
+
+# Cross-origin isolation, required for SharedArrayBuffer.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"
+
+# The wasm runtime pulls in worker scripts dynamically; without a correct MIME
+# type the browser refuses to instantiate them.
+[[headers]]
+  for = "/PPSSPPSDL.js"
+  [headers.values]
+    Content-Type = "text/javascript; charset=utf-8"
+
+[[headers]]
+  for = "/PPSSPPSDL.wasm"
+  [headers.values]
+    Content-Type = "application/wasm"
+
+[[headers]]
+  for = "/PPSSPPSDL.data"
+  [headers.values]
+    Content-Type = "application/octet-stream"
+
+# Game images are immutable once deployed; let the CDN keep them.
+[[headers]]
+  for = "/games/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Everything else must not be cached, or a redeploy appears to do nothing.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

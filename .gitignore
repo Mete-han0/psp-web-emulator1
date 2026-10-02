@@ -1,0 +1,21 @@
+# Build output IS committed.
+#
+# PPSSPPSDL.{js,wasm,data} is ~36 MB and is what makes the site actually run.
+# Regenerating it means compiling PPSSPP for wasm, which takes a long build and
+# needs an Emscripten toolchain -- so excluding it would leave every clone as a
+# broken front end with no emulator behind it.
+#
+# The 2.3 GB ppsspp-wasm/ source tree stays out of git; ./build.sh regenerates
+# these three files from it.
+
+# The emulator source tree (~2.3 GB with submodules). Only needed to rebuild.
+ppsspp-wasm/
+
+# Game images. These are yours to redistribute or not; keeping them out of git
+# avoids an accidental commit of several hundred MB.
+web/games/
+
+# Local tooling
+.venv/
+*.log
+.DS_Store
