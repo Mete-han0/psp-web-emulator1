@@ -10,7 +10,7 @@ context. Keep any tool-specific instruction file as a pointer here, not a copy.
 - Read `README.md`, the relevant parts of `NOTES.md`, and the source files for
   the task before editing. Check the current branch and working tree first.
 - Record the task's scope, intended files, and acceptance criteria in the task
-  brief or pull request. Keep changes focused on that scope.
+  brief or handoff. Keep changes focused on that scope.
 - Check claims in documentation against current code when they matter to the
   task. If they disagree, report the discrepancy rather than treating either
   claim as verified behavior.
@@ -20,12 +20,13 @@ context. Keep any tool-specific instruction file as a pointer here, not a copy.
 - Assign one active writer per file. Divide concurrent work by files or areas
   and agree on ownership before editing. Coordinate before touching a file
   owned by another contributor.
-- Use separate worktrees or checkouts when concurrent tasks need independent
-  Git operations or could overlap. Otherwise keep ownership explicit in the
-  shared checkout. Preserve changes made by others; do not reset, revert, or
-  overwrite their work to make your branch clean.
+- Parallel contributors may edit only their assigned, non-overlapping files in
+  the shared checkout or return proposed patches to the integrator. Give one
+  integrator ownership of Git operations and handle overlapping edits in
+  sequence. Preserve changes made by others; do not reset, revert, or overwrite
+  their work to make the working tree clean.
 - Designate one integrator to review the combined diff, resolve overlaps, and
-  prepare the pull request. A handoff must name changed files, completed work,
+  commit and push on `main`. A handoff must name changed files, completed work,
   checks performed, open questions, and remaining work.
 
 ## Preserve project behavior
@@ -55,7 +56,7 @@ context. Keep any tool-specific instruction file as a pointer here, not a copy.
 - Run checks relevant to the change. For browser behavior, the documented local
   entry point is `python3 serve.py 8087`. Report what was checked, the result,
   and what could not be checked; do not present an unrun check as passing.
-- Use a task-specific branch and a pull request targeting `main`. Keep commits
-  focused and exclude unrelated changes. The pull request should state the
-  purpose, changed files, verification, and remaining risks. Have a maintainer
-  review it before merge; do not push changes directly to `main`.
+- Use `main` as the only working branch. Keep commits focused and exclude
+  unrelated changes. Review the combined diff and relevant checks before
+  pushing to `origin/main`. Do not force-push or overwrite remote history; if a
+  push is rejected, fetch and integrate the remote changes before retrying.
