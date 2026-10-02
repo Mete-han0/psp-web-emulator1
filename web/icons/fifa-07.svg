@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"
+     role="img" aria-label="FIFA 07 Soccer">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#041a3c"/>
+      <stop offset=".55" stop-color="#0a3a7a"/>
+      <stop offset="1" stop-color="#1160b8"/>
+    </linearGradient>
+    <radialGradient id="halo" cx=".5" cy=".45" r=".5">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <circle cx="200" cy="136" r="150" fill="url(#halo)"/>
+
+  <!-- stadium bowl hint -->
+  <g fill="#04203f" opacity=".85">
+    <path d="M0 216 q100 -34 200 -34 t200 34 v50 H0 Z"/>
+  </g>
+  <g fill="#ffd166" opacity=".55">
+    <circle cx="52" cy="222" r="3"/><circle cx="96" cy="210" r="3"/>
+    <circle cx="150" cy="202" r="3"/><circle cx="250" cy="202" r="3"/>
+    <circle cx="304" cy="210" r="3"/><circle cx="348" cy="222" r="3"/>
+  </g>
+
+  <!-- the classic stitched ball, large -->
+  <g transform="translate(200 132)">
+    <circle r="82" fill="#f7f9fb"/>
+    <circle r="82" fill="none" stroke="#b9c4cd" stroke-width="2.5"/>
+    <!-- central pentagon -->
+    <path d="M0 -26 l25 18 -9.5 30 h-31 l-9.5 -30 Z" fill="#12203a"/>
+    <!-- surrounding panels -->
+    <g fill="#12203a">
+      <path d="M-25 -18 L-58 -32 l-11 26 22 18 22 -12 Z"/>
+      <path d="M25 -18 L58 -32 l11 26 -22 18 -22 -12 Z"/>
+      <path d="M-47 -4 l-22 -18 -13 30 25 16 21 -18 Z"/>
+      <path d="M47 -4 l22 -18 13 30 -25 16 -21 -18 Z"/>
+      <path d="M-30 22 L-9 22 l-6 30 -21 6 -14 -24 Z"/>
+      <path d="M30 22 L9 22 l6 30 21 6 14 -24 Z"/>
+      <path d="M0 52 l-19 20 6 22 13 -8 13 8 6 -22 Z"/>
+    </g>
+    <!-- highlights -->
+    <path d="M-64 -34 a82 82 0 0 1 74 -44 l-20 30 a44 44 0 0 0 -34 20 Z" fill="url(#shine)"/>
+  </g>
+
+  <!-- arc trail -->
+  <path d="M40 250 q160 -70 320 0" fill="none" stroke="#7fd4ff" stroke-width="4" opacity=".45"/>
+  <path d="M0 300 L400 300 L400 268 q-200 46 -400 0 Z" fill="#04203f"/>
+</svg>

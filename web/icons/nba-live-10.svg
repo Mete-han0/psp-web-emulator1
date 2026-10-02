@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"
+     role="img" aria-label="NBA Live 10">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#07202e"/>
+      <stop offset=".55" stop-color="#0d4256"/>
+      <stop offset="1"   stop-color="#12707e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fff3cf" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#ffd88a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="400" height="300" fill="url(#sky)"/>
+  <!-- arena light haze -->
+  <circle cx="200" cy="150" r="190" fill="url(#glow)" opacity=".35"/>
+
+  <!-- backboard -->
+  <rect x="126" y="52" width="148" height="92" rx="5" fill="#0b2a36" stroke="#2ee6b6" stroke-width="3"/>
+  <rect x="168" y="96" width="64" height="40" fill="none" stroke="#2ee6b6" stroke-width="3" opacity=".8"/>
+  <!-- rim + net -->
+  <ellipse cx="200" cy="150" rx="30" ry="8" fill="none" stroke="#ff6b3d" stroke-width="6"/>
+  <g stroke="#e8f6f4" stroke-width="2.2" fill="none" opacity=".8">
+    <path d="M172 152 l8 40 M186 154 l3 44 M200 154 v46 M214 154 l-3 44 M228 152 l-8 40"/>
+    <path d="M176 170 h48 M180 190 h40"/>
+  </g>
+
+  <!-- court -->
+  <path d="M0 232 L400 232 L400 300 L0 300 Z" fill="#08222c"/>
+  <g stroke="#2ee6b6" stroke-width="2.5" fill="none" opacity=".5">
+    <path d="M0 232 H400"/><ellipse cx="200" cy="288" rx="70" ry="26"/>
+  </g>
+
+  <!-- ball mid-arc, motion streaks -->
+  <g stroke="#7fe9d8" stroke-width="3" opacity=".45" fill="none" stroke-linecap="round">
+    <path d="M96 262 q26 -14 52 -6"/><path d="M104 280 q26 -14 52 -6"/>
+  </g>
+  <g transform="translate(300 236)">
+    <circle r="34" fill="#e2761f"/>
+    <circle r="34" fill="none" stroke="#8c3f0c" stroke-width="2.4"/>
+    <g fill="none" stroke="#2a1206" stroke-width="2.4">
+      <circle r="34"/><path d="M-34 0 H34"/><path d="M0 -34 V34"/>
+      <path d="M-24 -24 A34 34 0 0 0 -24 24"/><path d="M24 -24 A34 34 0 0 1 24 24"/>
+    </g>
+  </g>
+</svg>

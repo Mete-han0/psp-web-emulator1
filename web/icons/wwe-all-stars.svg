@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"
+     role="img" aria-label="WWE All Stars">
+  <defs>
+    <linearGradient id="arena" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#160409"/>
+      <stop offset=".6" stop-color="#3d0a14"/>
+      <stop offset="1" stop-color="#6d0f1e"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff8e2" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#fff8e2" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="mat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3038"/>
+      <stop offset="1" stop-color="#14181d"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="300" fill="url(#arena)"/>
+
+  <!-- spotlight cones from the rigging -->
+  <path d="M96 0 L150 236 L36 236 Z" fill="url(#beam)"/>
+  <path d="M304 0 L250 236 L364 236 Z" fill="url(#beam)"/>
+  <rect x="60" y="6" width="280" height="10" fill="#0b0205"/>
+
+  <!-- ring: mat -->
+  <path d="M0 236 L400 236 L400 300 L0 300 Z" fill="url(#mat)"/>
+  <!-- apron -->
+  <path d="M0 236 L28 214 H372 L400 236 Z" fill="#3f444d"/>
+
+  <!-- ropes: three horizontal bands with posts -->
+  <g stroke="#e02b3a" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M28 168 H372"/><path d="M28 192 H372"/><path d="M28 214 H372"/>
+  </g>
+  <g fill="#c8ccd2">
+    <rect x="20" y="152" width="12" height="84" rx="4"/>
+    <rect x="368" y="152" width="12" height="84" rx="4"/>
+  </g>
+  <g fill="#c8ccd2">
+    <rect x="190" y="142" width="20" height="16" rx="3"/>
+  </g>
+  <!-- turnbuckle pads -->
+  <g fill="#f5c518">
+    <rect x="14" y="150" width="10" height="26" rx="3"/>
+    <rect x="376" y="150" width="10" height="26" rx="3"/>
+  </g>
+
+  <!-- two silhouetted wrestlers grappling -->
+  <g fill="#07090c">
+    <g transform="translate(158 236)">
+      <circle cx="0" cy="-104" r="15"/>
+      <path d="M-17 -88 q17 -12 34 0 l10 44 -14 6 -6 -26 -4 60 h-20 l-4 -60 -6 26 -14 -6 Z"/>
+      <path d="M-16 -84 q-34 -14 -44 -44 l10 -6 q16 26 44 34 Z"/>
+    </g>
+    <g transform="translate(244 236)">
+      <circle cx="0" cy="-104" r="15"/>
+      <path d="M17 -88 q-17 -12 -34 0 l-10 44 14 6 6 -26 4 60 h20 l4 -60 6 26 14 -6 Z"/>
+      <path d="M16 -84 q34 -14 44 -44 l-10 -6 q-16 26 -44 34 Z"/>
+    </g>
+  </g>
+</svg>

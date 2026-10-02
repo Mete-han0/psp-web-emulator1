@@ -586,14 +586,37 @@ async function playSessionFiles(entry, files) {
 
 // Where "Download" sends the user.
 //
-// A plain index page is unusable for finding one specific game in a collection
-// of hundreds, which is what people were resorting to Cmd+F for. A Text
-// Fragment (#:~:text=) makes the browser scroll to and highlight the matching
-// row on arrival -- supported in Chrome 89+ and Safari 16.1+, and it degrades
-// harmlessly to the plain listing everywhere else.
+// The listing is unusable for finding one specific game among hundreds, which is
+// what people were resorting to Cmd+F for. A Text Fragment (#:~:text=) was the
+// obvious fix: the browser scrolls to and highlights the matching row.
+//
+// It does not work here, and that is a property of the target page rather than
+// a bug in the fragment. archive.org's directory listing renders ~1,200 rows
+// (the whole PSP CSO dump) into a document tens of thousands of pixels tall.
+// Verified in Chrome against the live page: the fragment is accepted -- the row
+// text matches exactly one element -- but scrollY stays 0 and the target never
+// enters the viewport. A plain listing load is not a viable fallback either,
+// since it lands the user at row "A" with nothing in view.
+//
+// So Download points straight at the file. archive.org 302s to the item server,
+// which responds 200 with Content-Disposition: attachment, so the browser saves
+// the file instead of rendering it. This is strictly better anyway: one click
+// from the tile to the file on disk, with no index to read.
+//
+// sourceText is kept as the exact filename, which is what makes the direct URL
+// correct and is worth having as data even where the fragment is unreliable.
 
+// sourceFile must be the COMPLETE filename, not a substring. Archive.org matches
+// direct URLs exactly, so "Liberty City Stories (USA).cso" is a 404 -- the row is
+// really "Grand Theft Auto - Liberty City Stories (USA).cso". A Text Fragment
+// tolerated a partial match, which is exactly why the truncation went unnoticed
+// while the fragment approach was in use.
 function sourceUrl(g) {
   const base = g.source || '';
+  if (g.sourceFile) {
+    const dir = base.endsWith('/') ? base : base + '/';
+    return dir + encodeURIComponent(g.sourceFile);
+  }
   if (!g.sourceText) return base;
   return base + '#:~:text=' + encodeURIComponent(g.sourceText);
 }

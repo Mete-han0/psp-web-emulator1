@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"
+     role="img" aria-label="NBA 2K13">
+  <defs>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a4a22"/>
+      <stop offset="1" stop-color="#4a2a12"/>
+    </linearGradient>
+    <radialGradient id="spot" cx=".5" cy="0" r="1">
+      <stop offset="0" stop-color="#ffd9a0" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="400" height="300" fill="#120a06"/>
+  <!-- hardwood, receding -->
+  <path d="M0 96 L400 96 L400 300 L0 300 Z" fill="url(#floor)"/>
+  <g stroke="#2c1708" stroke-width="2" opacity=".5">
+    <path d="M40 300 L110 96"/><path d="M110 300 L160 96"/><path d="M180 300 L200 96"/>
+    <path d="M250 300 L240 96"/><path d="M320 300 L280 96"/><path d="M370 300 L310 96"/>
+    <path d="M0 128 H400"/><path d="M0 172 H400"/><path d="M0 228 H400"/>
+  </g>
+  <!-- arc + key -->
+  <g stroke="#f0e2cf" stroke-width="3" fill="none" opacity=".75">
+    <ellipse cx="200" cy="286" rx="96" ry="46"/>
+    <path d="M150 300 L166 190 H234 L250 300"/>
+  </g>
+
+  <rect width="400" height="140" fill="url(#spot)"/>
+
+  <!-- basket rim, upper right -->
+  <g fill="none" stroke="#ff5a3c" stroke-width="6">
+    <ellipse cx="300" cy="74" rx="34" ry="9"/>
+    <path d="M274 80 v12 M326 80 v12" stroke="#8c2a16" stroke-width="4"/>
+  </g>
+  <path d="M278 84 l10 34 M296 86 v36 M314 86 v36 M322 84 l-10 34"
+        stroke="#f2f2f2" stroke-width="2.4" fill="none" opacity=".85"/>
+
+  <!-- ball -->
+  <g transform="translate(150 158)">
+    <circle r="52" fill="#e2761f"/>
+    <circle r="52" fill="none" stroke="#8c3f0c" stroke-width="3"/>
+    <g fill="none" stroke="#2a1206" stroke-width="3.4">
+      <circle r="52"/>
+      <path d="M-52 0 H52"/><path d="M0 -52 V52"/>
+      <path d="M-37 -37 A52 52 0 0 0 -37 37"/>
+      <path d="M37 -37 A52 52 0 0 1 37 37"/>
+    </g>
+  </g>
+</svg>

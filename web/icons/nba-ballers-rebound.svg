@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"
+     role="img" aria-label="NBA Ballers Rebound">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#25124a"/>
+      <stop offset=".6" stop-color="#5a1f7a"/>
+      <stop offset="1" stop-color="#b33a86"/>
+    </linearGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".45"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="300" fill="url(#bg)"/>
+
+  <!-- graffiti-ish angular backdrop -->
+  <g fill="#ffffff" opacity=".12">
+    <path d="M0 250 L120 120 L190 250 Z"/>
+    <path d="M170 250 L300 90 L400 250 Z"/>
+  </g>
+
+  <!-- starburst -->
+  <g transform="translate(200 152)" opacity=".22">
+    <circle r="132" fill="url(#fade)"/>
+  </g>
+
+  <!-- ball, big and central -->
+  <g transform="translate(200 148)">
+    <circle r="76" fill="#e2761f"/>
+    <circle r="76" fill="none" stroke="#8c3f0c" stroke-width="4"/>
+    <g fill="none" stroke="#2a1206" stroke-width="5">
+      <circle r="76"/><path d="M-76 0 H76"/><path d="M0 -76 V76"/>
+      <path d="M-54 -54 A76 76 0 0 0 -54 54"/>
+      <path d="M54 -54 A76 76 0 0 1 54 54"/>
+    </g>
+  </g>
+
+  <!-- court strip + bounce arc -->
+  <path d="M0 246 L400 246 L400 300 L0 300 Z" fill="#1c0a33"/>
+  <path d="M150 300 q50 -54 100 0" fill="none" stroke="#ffd166" stroke-width="5" opacity=".8"/>
+  <g stroke="#ffd166" stroke-width="3" opacity=".35" stroke-linecap="round">
+    <path d="M40 262 H118"/><path d="M282 262 H360"/>
+  </g>
+</svg>

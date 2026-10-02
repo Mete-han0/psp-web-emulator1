@@ -8,8 +8,11 @@
     "",
     "Two fields per entry:",
     "",
-    "  source        - page to visit to obtain the image. The Download button",
-    "                  opens it in a new tab. Nothing is fetched by this site.",
+    "  source        - the collection page. Download goes to sourceFile when",
+    "                  present, otherwise to source with a Text Fragment.",
+    "  sourceFile    - exact filename within that collection. Download points",
+    "                  straight at it, so one click lands on the file itself.",
+    "  sourceText    - same filename, kept as data for the listing fallback.",
     "  files         - for multi-file ('directory game') layouts, the member names",
     "                  expected inside the user's supplied folder.",
     "",
@@ -24,7 +27,6 @@
     "Consequence: the file must be picked again after a reload. That is the",
     "deliberate trade."
   ],
-
   "games": [
     {
       "id": "gta-lcs",
@@ -33,8 +35,108 @@
       "badge": "PSP",
       "icon": "icons/gta-lcs.svg",
       "source": "https://archive.org/download/psp-cso-collection/",
-      "sourceText": "Liberty City Stories (USA).cso",
+      "sourceFile": "Grand Theft Auto - Liberty City Stories (USA).cso",
+      "sourceText": "Grand Theft Auto - Liberty City Stories (USA).cso",
       "notes": "No copy is served here. Download points at the source; supply your own image via Add file or drag-and-drop to play."
+    },
+    {
+      "id": "nba-2k13",
+      "title": "NBA 2K13",
+      "subtitle": "USA",
+      "badge": "PSP",
+      "icon": "icons/nba-2k13.svg",
+      "source": "https://archive.org/download/psp-cso-collection/",
+      "sourceFile": "NBA 2K13 (USA).cso",
+      "sourceText": "NBA 2K13 (USA).cso",
+      "notes": "The last 2K on PSP. No copy is served here; Download points at the source."
+    },
+    {
+      "id": "nba-live-10",
+      "title": "NBA Live 10",
+      "subtitle": "USA",
+      "badge": "PSP",
+      "icon": "icons/nba-live-10.svg",
+      "source": "https://archive.org/download/psp-cso-collection/",
+      "sourceFile": "NBA Live 10 (USA).cso",
+      "sourceText": "NBA Live 10 (USA).cso",
+      "notes": "The final PSP entry in the Live series. No copy is served here."
+    },
+    {
+      "id": "nba-ballers-rebound",
+      "title": "NBA Ballers Rebound",
+      "subtitle": "USA",
+      "badge": "PSP",
+      "icon": "icons/nba-ballers-rebound.svg",
+      "source": "https://archive.org/download/psp-cso-collection/",
+      "sourceFile": "NBA Ballers Rebound (USA).cso",
+      "sourceText": "NBA Ballers Rebound (USA).cso",
+      "notes": "PSP-exclusive arcade basketball. No copy is served here."
+    },
+    {
+      "id": "wwe-all-stars",
+      "title": "WWE All Stars",
+      "subtitle": "USA",
+      "badge": "PSP",
+      "icon": "icons/wwe-all-stars.svg",
+      "source": "https://archive.org/download/psp-cso-collection/",
+      "sourceFile": "WWE All Stars (USA).cso",
+      "sourceText": "WWE All Stars (USA).cso",
+      "notes": "Cross-generational roster. No copy is served here."
+    },
+    {
+      "id": "wwe-smackdown-raw-2010",
+      "title": "WWE SmackDown vs. RAW 2010",
+      "subtitle": "USA · featuring ECW",
+      "badge": "PSP",
+      "icon": "icons/wwe-smackdown-raw-2010.svg",
+      "source": "https://archive.org/download/psp-cso-collection/",
+      "sourceFile": "WWE Smackdown! vs. RAW 2010 featuring ECW (USA).cso",
+      "sourceText": "WWE Smackdown! vs. RAW 2010 featuring ECW (USA).cso",
+      "notes": "Listed on the source as 'Smackdown!'. No copy is served here."
+    },
+    {
+      "id": "fifa-soccer-13",
+      "title": "FIFA Soccer 13",
+      "subtitle": "USA",
+      "badge": "PSP",
+      "icon": "icons/fifa-soccer-13.svg",
+      "source": "https://archive.org/download/psp-cso-collection/",
+      "sourceFile": "FIFA Soccer '13 (USA).cso",
+      "sourceText": "FIFA Soccer '13 (USA).cso",
+      "notes": "The last FIFA on PSP. No copy is served here."
+    },
+    {
+      "id": "fifa-07",
+      "title": "FIFA 07",
+      "subtitle": "Soccer · USA",
+      "badge": "PSP",
+      "icon": "icons/fifa-07.svg",
+      "source": "https://archive.org/download/psp-cso-collection/",
+      "sourceFile": "FIFA '07 - Soccer (USA).cso",
+      "sourceText": "FIFA '07 - Soccer (USA).cso",
+      "notes": "First FIFA on PSP. No copy is served here."
+    },
+    {
+      "id": "fft-war-of-the-lions",
+      "title": "Final Fantasy Tactics: The War of the Lions",
+      "subtitle": "USA",
+      "badge": "PSP",
+      "icon": "icons/fft-war-of-the-lions.svg",
+      "source": "https://archive.org/download/psp-cso-collection/",
+      "sourceFile": "Final Fantasy Tactics - The War of the Lions (USA).cso",
+      "sourceText": "Final Fantasy Tactics - The War of the Lions (USA).cso",
+      "notes": "PSP-exclusive tactics spin-off. No copy is served here."
+    },
+    {
+      "id": "crisis-core-ff7",
+      "title": "Crisis Core: Final Fantasy VII",
+      "subtitle": "USA",
+      "badge": "PSP",
+      "icon": "icons/crisis-core-ff7.svg",
+      "source": "https://archive.org/download/psp-cso-collection/",
+      "sourceFile": "Crisis Core - Final Fantasy VII (USA).cso",
+      "sourceText": "Crisis Core - Final Fantasy VII (USA).cso",
+      "notes": "Action spin-off of FFVII. No copy is served here."
     },
     {
       "id": "cavestory",
@@ -42,8 +144,10 @@
       "subtitle": "Doukutsu Monogatari · homebrew port",
       "badge": "FREE",
       "source": "https://www.cavestory.one/downloads/",
-
-      "files": ["EBOOT.PBP", "data.csz"],
+      "files": [
+        "EBOOT.PBP",
+        "data.csz"
+      ],
       "notes": "Freeware platformer by Studio Pixel, PSP port by ufo_z. A directory game: add the folder containing EBOOT.PBP and data.csz."
     }
   ]

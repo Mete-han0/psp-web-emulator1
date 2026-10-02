@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"
+     role="img" aria-label="FIFA Soccer 13">
+  <defs>
+    <linearGradient id="pitch" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f7a34"/>
+      <stop offset=".5" stop-color="#175f28"/>
+      <stop offset="1" stop-color="#0f4620"/>
+    </linearGradient>
+    <radialGradient id="flood" cx=".5" cy="0" r="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="400" height="300" fill="#0a2c14"/>
+  <!-- striped turf -->
+  <g fill="url(#pitch)">
+    <rect x="0" y="0" width="50" height="300"/>
+    <rect x="100" y="0" width="50" height="300"/>
+    <rect x="200" y="0" width="50" height="300"/>
+    <rect x="300" y="0" width="50" height="300"/>
+  </g>
+  <rect width="400" height="300" fill="url(#flood)"/>
+
+  <!-- markings: halfway line, centre circle, penalty box -->
+  <g stroke="#eafff0" stroke-width="3" fill="none" opacity=".62">
+    <path d="M0 150 H400"/>
+    <circle cx="200" cy="150" r="52"/>
+    <path d="M0 250 H64 V50 H0"/>
+    <path d="M400 250 H336 V50 H400"/>
+    <path d="M0 108 H28 V192 H0"/>
+    <path d="M400 108 H372 V192 H400"/>
+  </g>
+  <circle cx="200" cy="150" r="5" fill="#eafff0" opacity=".7"/>
+
+  <!-- ball -->
+  <g transform="translate(200 148)">
+    <circle r="40" fill="#f6f8fa"/>
+    <circle r="40" fill="none" stroke="#c3ccd4" stroke-width="2"/>
+    <g fill="#15181c">
+      <path d="M0 -17 l14 10 -5 16 h-18 l-5 -16 Z"/>
+      <path d="M-34 -6 l16 -4 10 14 -6 16 -16 -2 Z" opacity=".9"/>
+      <path d="M34 -6 l-16 -4 -10 14 6 16 16 -2 Z" opacity=".9"/>
+      <path d="M-24 32 l8 -14 h20 l8 14 -18 9 Z" opacity=".9"/>
+    </g>
+    <g fill="none" stroke="#15181c" stroke-width="2.4" opacity=".85">
+      <path d="M0 -40 V-17"/><path d="M-40 0 h-11 M40 0 h11"/>
+      <path d="M-27 27 l-14 12 M27 27 l14 12"/>
+    </g>
+  </g>
+
+  <!-- motion streaks behind the ball -->
+  <g stroke="#d8ffe6" stroke-width="3" opacity=".3" stroke-linecap="round">
+    <path d="M96 148 H140"/><path d="M260 148 H304"/>
+  </g>
+</svg>

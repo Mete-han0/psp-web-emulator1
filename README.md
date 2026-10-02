@@ -74,6 +74,34 @@ git clone --recurse-submodules <ppsspp-wasm-url> ppsspp-wasm
 
 That tree is ~2.3 GB and is deliberately not in git.
 
+## Download buttons
+
+`library.json` entries carry a `sourceFile` — the **complete** filename in the
+collection. Download points straight at that file. Archive.org 302s to the item
+server, which replies with `Content-Disposition: attachment`, so the browser
+saves it rather than trying to render a 1 GB CSO.
+
+This replaced an earlier Text Fragment (`#:~:text=`) approach, which scrolled to
+and highlighted the matching row in the listing. It does not work on that page:
+the listing renders ~1,200 rows into a document tens of thousands of pixels
+tall, and Chrome accepts the fragment without ever scrolling to it — `scrollY`
+stays 0. Landing on the plain listing doesn't help either, since it opens at row
+"A" with nothing in view.
+
+Two things worth knowing if you edit these entries:
+
+- **`sourceFile` must be the full filename.** Archive.org matches direct URLs
+  exactly. `Liberty City Stories (USA).cso` is a 404; the row is really
+  `Grand Theft Auto - Liberty City Stories (USA).cso`. A Text Fragment accepted
+  the truncated form, which is how that went unnoticed.
+- **`sourceFile` is data, not a link target you can eyeball.** Verify with a
+  range request, which transfers a single byte instead of the whole file:
+
+      curl -s -o /dev/null -w "%{http_code}\n" -L -r 0-0 \
+        "https://archive.org/download/psp-cso-collection/<url-encoded name>"
+
+  `206` means the file is there. `404` means the name is wrong.
+
 ## Notes
 
 - Interface in English and Turkish. Game titles and subtitles are never
