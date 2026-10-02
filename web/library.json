@@ -8,11 +8,14 @@
     "",
     "Two fields per entry:",
     "",
-    "  source        - the collection page. Download goes to sourceFile when",
-    "                  present, otherwise to source with a Text Fragment.",
-    "  sourceFile    - exact filename within that collection. Download points",
-    "                  straight at it, so one click lands on the file itself.",
+    "  source        - the collection page. Download opens it with a Text",
+    "                  Fragment that jumps to and highlights the row.",
+    "  sourceFile    - exact filename of the row in that collection.",
     "  sourceText    - same filename, kept as data for the listing fallback.",
+    "  sourceFragment- optional. Short substring used as the fragment instead of",
+    "                  the full row name, for rows whose full name will not",
+    "                  match (anything containing ' - '). Must stay unique",
+    "                  across the listing, case-insensitively.",
     "  files         - for multi-file ('directory game') layouts, the member names",
     "                  expected inside the user's supplied folder.",
     "",
@@ -37,6 +40,7 @@
       "source": "https://archive.org/download/psp-cso-collection/",
       "sourceFile": "Grand Theft Auto - Liberty City Stories (USA).cso",
       "sourceText": "Grand Theft Auto - Liberty City Stories (USA).cso",
+      "sourceFragment": "Liberty City Stories",
       "notes": "No copy is served here. Download points at the source; supply your own image via Add file or drag-and-drop to play."
     },
     {
@@ -114,6 +118,7 @@
       "source": "https://archive.org/download/psp-cso-collection/",
       "sourceFile": "FIFA '07 - Soccer (USA).cso",
       "sourceText": "FIFA '07 - Soccer (USA).cso",
+      "sourceFragment": "FIFA '07",
       "notes": "First FIFA on PSP. No copy is served here."
     },
     {
@@ -125,6 +130,7 @@
       "source": "https://archive.org/download/psp-cso-collection/",
       "sourceFile": "Final Fantasy Tactics - The War of the Lions (USA).cso",
       "sourceText": "Final Fantasy Tactics - The War of the Lions (USA).cso",
+      "sourceFragment": "War of the Lions",
       "notes": "PSP-exclusive tactics spin-off. No copy is served here."
     },
     {
@@ -136,6 +142,7 @@
       "source": "https://archive.org/download/psp-cso-collection/",
       "sourceFile": "Crisis Core - Final Fantasy VII (USA).cso",
       "sourceText": "Crisis Core - Final Fantasy VII (USA).cso",
+      "sourceFragment": "Crisis Core",
       "notes": "Action spin-off of FFVII. No copy is served here."
     },
     {

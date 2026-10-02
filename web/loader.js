@@ -590,26 +590,11 @@ async function playSessionFiles(entry, files) {
 // what people were resorting to Cmd+F for. A Text Fragment (#:~:text=) was the
 // obvious fix: the browser scrolls to and highlights the matching row.
 //
-// It does not work here, and that is a property of the target page rather than
-// a bug in the fragment. archive.org's directory listing renders ~1,200 rows
-// (the whole PSP CSO dump) into a document tens of thousands of pixels tall.
-// Verified in Chrome against the live page: the fragment is accepted -- the row
-// text matches exactly one element -- but scrollY stays 0 and the target never
-// enters the viewport. A plain listing load is not a viable fallback either,
-// since it lands the user at row "A" with nothing in view.
-//
-// So Download points straight at the file. archive.org 302s to the item server,
-// which responds 200 with Content-Disposition: attachment, so the browser saves
-// the file instead of rendering it. This is strictly better anyway: one click
-// from the tile to the file on disk, with no index to read.
-//
-// sourceText is kept as the exact filename, which is what makes the direct URL
-// correct and is worth having as data even where the fragment is unreliable.
-
-// Download opens the collection's listing page and jumps to the row, rather than
-// fetching the file. The Text Fragment (#:~:text=) is what does the jumping: the
-// browser scrolls the match into view and highlights it. Supported in Chrome 89+
-// and Safari 16.1+; elsewhere the link still lands on a working listing.
+// Download opens the collection's listing page (some 1,200 rows) and jumps to
+// the row, rather than fetching the file. The Text Fragment (#:~:text=) is what
+// does the jumping: the browser scrolls the match into view and highlights it.
+// Supported in Chrome 89+ and Safari 16.1+; elsewhere the link still lands on a
+// working listing.
 //
 // One behaviour worth knowing, because it looks like a bug and is not: the
 // fragment is honoured only while the tab has focus. Opening the link into a new
@@ -618,15 +603,19 @@ async function playSessionFiles(entry, files) {
 // So the link deliberately does NOT open in a new tab. One tab, focused, the row
 // visible and highlighted, which is what this button is for.
 //
-// sourceFile must be the COMPLETE filename, not a substring. Archive.org matches
-// direct URLs exactly, so "Liberty City Stories (USA).cso" is a 404 -- the row is
-// really "Grand Theft Auto - Liberty City Stories (USA).cso". A Text Fragment
-// tolerated a partial match, which is exactly why the truncation went unnoticed.
+// Fragment text must avoid " - " (space-hyphen-space). Verified in Chrome against
+// the live listing: every full-filename fragment containing " - " fails to scroll
+// (scrollY stays 0, target never enters the viewport), while fragments without it
+// succeed -- including ones with apostrophes, exclamation marks and parentheses.
+// Entries that need it carry `sourceFragment`: a short, punctuation-light,
+// case-insensitively unique substring of the row. Entries without one keep the
+// full filename, which is why working entries must not gain this field.
 function sourceUrl(g) {
   const base = g.source || '';
-  // sourceFile is the authoritative row name; fall back to sourceText for
-  // entries that were written before sourceFile existed.
-  const row = g.sourceFile || g.sourceText;
+  // sourceFragment overrides only where the full row name will not match; the
+  // fallback order for everything else is unchanged, so working entries produce
+  // byte-identical URLs with or without this field present elsewhere.
+  const row = g.sourceFragment || g.sourceFile || g.sourceText;
   if (!row) return base;
   return base + '#:~:text=' + encodeURIComponent(row);
 }
