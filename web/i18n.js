@@ -68,9 +68,23 @@ const DICT = {
     'set.notRunning': 'not running',
 
     // library page
-    'lib.openTitle': 'Open a game from your device',
-    'lib.openHint': 'Drag a .cso or .iso here — .cso is preferred (smaller).',
-    'lib.choose': 'Choose file',
+    'lib.ownedTitle': 'Library',
+    'lib.publicTitle': 'Public',
+    'lib.catalogTabs': 'Catalog views',
+    'lib.ownedHint': 'Your added games, ready to play.',
+    'lib.publicHint': 'Find a game, visit its source, then add your own file to Library.',
+    'lib.ownedEmpty': 'Your Library is empty. Add a game file below to get started.',
+    'lib.addGame': 'Choose & Play',
+    'lib.addToLibrary': 'Add & Play',
+    'lib.remove': 'Remove',
+    'lib.selectFile': 'Select file',
+    'lib.localBadge': 'YOUR GAME',
+    'lib.openTitle': 'Choose a game to add to Library and play',
+    'lib.openHint': 'Choose a .cso, .iso, .pbp, or .chd file to add it and start playing. The file stays on your device and may need to be selected again later.',
+    'lib.choose': 'Choose & Play',
+    'st.added': 'Added {name} to your Library.',
+    'st.invalidFile': 'Choose a supported game file (.cso, .iso, .pbp, or .chd).',
+    'st.removed': 'Removed {name} from your Library.',
     'lib.ready': 'Ready.',
     'lib.searchEmpty': 'No games match that search.',
     'lib.extBadge': 'EXTERNAL',
@@ -162,9 +176,23 @@ const DICT = {
     'set.sessionHint': 'Emülatörden çıkmak sayfayı yeniden yükler — wasm örneği yeniden kullanılamaz — bu yüzden kayıtlar önce boşaltılır.',
     'set.notRunning': 'çalışmıyor',
 
-    'lib.openTitle': 'Cihazınızdan bir oyun açın',
-    'lib.openHint': 'Buraya bir .cso veya .iso sürükleyin — .cso tercih edilir (daha küçük).',
-    'lib.choose': 'Dosya seç',
+    'lib.ownedTitle': 'Library',
+    'lib.publicTitle': 'Public',
+    'lib.catalogTabs': 'Katalog görünümleri',
+    'lib.ownedHint': 'Eklediğiniz oyunlar, oynamaya hazır.',
+    'lib.publicHint': 'Bir oyun bulun, kaynağını ziyaret edin, ardından kendi dosyanızı Library’ye ekleyin.',
+    'lib.ownedEmpty': 'Library boş. Başlamak için aşağıdan bir oyun dosyası ekleyin.',
+    'lib.addGame': 'Seç ve Oynat',
+    'lib.addToLibrary': 'Library’ye ekle ve oynat',
+    'lib.remove': 'Kaldır',
+    'lib.selectFile': 'Dosya seç',
+    'lib.localBadge': 'OYUNUNUZ',
+    'lib.openTitle': 'Library’ye ekleyip oynamak için oyun seçin',
+    'lib.openHint': 'Oyunu ekleyip başlatmak için .cso, .iso, .pbp veya .chd dosyası seçin. Dosya cihazınızda kalır ve daha sonra yeniden seçmeniz gerekebilir.',
+    'lib.choose': 'Seç ve Oynat',
+    'st.added': '{name}, Library’ye eklendi.',
+    'st.invalidFile': 'Desteklenen bir oyun dosyası seçin (.cso, .iso, .pbp veya .chd).',
+    'st.removed': '{name}, Library’den kaldırıldı.',
     'lib.ready': 'Hazır.',
     'lib.searchEmpty': 'Aramayla eşleşen oyun yok.',
     'lib.extBadge': 'DIŞ',
@@ -247,6 +275,9 @@ function applyTranslations(root) {
   scope.querySelectorAll('[data-i18n-title]').forEach((el) => {
     el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
   });
+  scope.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+    el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+  });
 }
 
 // ---------------------------------------------------------------- search
@@ -267,37 +298,39 @@ function clearSearch() {
 // Case-insensitive match over title and subtitle. Game titles are never
 // translated -- they are data, and only filtered on here.
 function filterLibrary() {
-  const grid = document.getElementById('grid');
-  if (!grid) return;
+  const grids = ['ownedGrid', 'grid'].map((id) => document.getElementById(id)).filter(Boolean);
+  if (!grids.length) return;
 
-  const tiles = Array.from(grid.querySelectorAll('.tile'));
-  let shown = 0;
-
-  for (const tile of tiles) {
-    const hit = !searchTerm || (tile.dataset.search || '').includes(searchTerm);
-    tile.style.display = hit ? '' : 'none';
-    if (hit) shown++;
-  }
-
-  let empty = document.getElementById('searchEmpty');
-  if (searchTerm && shown === 0) {
-    if (!empty) {
-      empty = document.createElement('p');
-      empty.id = 'searchEmpty';
-      empty.className = 'status warn';
-      empty.setAttribute('data-i18n', 'lib.searchEmpty');
-      grid.parentNode.insertBefore(empty, grid.nextSibling);
+  let totalShown = 0;
+  for (const grid of grids) {
+    const tiles = Array.from(grid.querySelectorAll('.tile'));
+    let shown = 0;
+    for (const tile of tiles) {
+      const hit = !searchTerm || (tile.dataset.search || '').includes(searchTerm);
+      tile.style.display = hit ? '' : 'none';
+      if (hit) shown++;
     }
-    empty.style.display = '';
-    empty.textContent = t('lib.searchEmpty');
-  } else if (empty) {
-    empty.style.display = 'none';
+    totalShown += shown;
+
+    const emptyId = grid.id === 'ownedGrid' ? 'ownedSearchEmpty' : 'publicSearchEmpty';
+    let empty = document.getElementById(emptyId);
+    if (searchTerm && tiles.length && shown === 0) {
+      if (!empty) {
+        empty = document.createElement('p');
+        empty.id = emptyId;
+        empty.className = 'status warn';
+        empty.setAttribute('data-i18n', 'lib.searchEmpty');
+        grid.parentNode.insertBefore(empty, grid.nextSibling);
+      }
+      empty.style.display = '';
+      empty.textContent = t('lib.searchEmpty');
+    } else if (empty) {
+      empty.style.display = 'none';
+    }
   }
 
-  if (searchTerm) {
-    const box = document.getElementById('searchBox');
-    if (box) box.placeholder = `${searchTerm} — ${shown}`;
-  }
+  const box = document.getElementById('searchBox');
+  if (box) box.placeholder = searchTerm ? `${searchTerm} — ${totalShown}` : t('bar.search');
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -381,35 +381,95 @@ function boot() {
 
 // ---------------------------------------------------------------- library
 
-// No persistent storage of any kind. Deliberate.
-//
-// This project stores nothing: not on the server, and not in the browser. The
-// user picks a game from their own disk, it is read into memory for that
-// session, and when the page reloads it is gone. The alternative -- keeping a
-// copy in OPFS -- meant the browser quietly held hundreds of megabytes and the
-// user had no obvious way to see or reclaim it. Playing straight from the file
-// the user already has is the honest version of 'we host nothing'.
-
+// Public catalog and personal library are separate. Persist only small metadata
+// and supported file handles; game bytes remain on the user's disk or in the
+// current session's File objects, never copied to persistent browser storage.
 let libraryEntries = [];
-
-// Files the user has supplied for the CURRENT page session. A JS Map, so it
-// dies with the tab -- there is deliberately nothing on disk.
+let libraryLoadPromise = Promise.resolve();
 const sessionFiles = new Map();
+const OWNED_KEY = 'ppsspp-web:owned-library-v1';
+const ownedEntries = new Map();
+try {
+  const saved = JSON.parse(localStorage.getItem(OWNED_KEY) || '[]');
+  if (Array.isArray(saved)) {
+    for (const g of saved) {
+      if (g && typeof g.id === 'string' && typeof g.title === 'string') {
+        ownedEntries.set(g.id, g);
+      }
+    }
+  }
+} catch (e) { console.warn('[library] metadata unavailable:', e); }
 
-function hasSessionFile(id) {
-  return sessionFiles.has(id);
+function saveOwnedEntries() {
+  try { localStorage.setItem(OWNED_KEY, JSON.stringify(Array.from(ownedEntries.values()))); }
+  catch (e) { console.warn('[library] metadata was not saved:', e); }
+}
+function hasSessionFile(id) { return sessionFiles.has(id); }
+function isReadyToPlay(id) { return hasSessionFile(id) || rememberedState.has(id); }
+
+function localEntry(file) {
+  const normalized = (name) => String(name || '').toLowerCase().replace(/\.(cso|iso|pbp|chd)$/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const match = libraryEntries.find((g) =>
+    normalized(g.sourceFile || g.sourceText) === normalized(file.name) ||
+    normalized(g.title) === normalized(file.name));
+  if (match) return match;
+  let hash = 2166136261;
+  for (const c of file.name.toLowerCase() + ':' + file.size) {
+    hash ^= c.charCodeAt(0); hash = Math.imul(hash, 16777619);
+  }
+  return { id: 'local-' + (hash >>> 0).toString(16), title: file.name.replace(/\.(cso|iso|pbp|chd)$/i, ''), badge: 'LOCAL' };
 }
 
-// An entry is playable if we have the file in memory right now, OR a remembered
-// handle we can reopen. The handle is a path, not a copy.
-function isReadyToPlay(id) {
-  return hasSessionFile(id) || rememberedState.has(id);
-}
-
-// Remember files for this session only. A JS Map, so nothing is written to disk.
 function rememberSessionFiles(entry, files) {
-  if (!entry) return;
-  sessionFiles.set(entry.id, files);
+  const source = entry || localEntry(files[0]);
+  const previous = ownedEntries.get(source.id);
+  const record = {
+    id: source.id, title: source.title, subtitle: source.subtitle || '',
+    icon: source.icon || '', badge: source.badge || 'LOCAL',
+    files: source.files || null, fileName: files[0].name,
+    size: files.reduce((n, f) => n + f.size, 0),
+    addedAt: Date.now(), lastPlayedAt: previous ? previous.lastPlayedAt || 0 : 0,
+  };
+  ownedEntries.set(record.id, record);
+  sessionFiles.set(record.id, files);
+  saveOwnedEntries();
+  renderCollections();
+  return record;
+}
+
+function markPlayed(entry) {
+  const record = entry && ownedEntries.get(entry.id);
+  if (record) { record.lastPlayedAt = Date.now(); saveOwnedEntries(); }
+}
+
+function acceptFiles(entry, files) {
+  if (!files.length) return null;
+  if (entry && entry.files && entry.files.length) {
+    const names = new Set(files.map((f) => f.name.toLowerCase()));
+    const missing = entry.files.filter((n) => !names.has(n.toLowerCase()));
+    if (missing.length) { say(T('st.missingMembers', { names: missing.join(', ') }), 'err'); return null; }
+  } else if (!/\.(cso|iso|pbp|chd)$/i.test(files[0].name)) {
+    say(T('st.invalidFile'), 'err'); return null;
+  }
+  return rememberSessionFiles(entry, files);
+}
+
+function revealLibrary(record) {
+  if (typeof window.setCatalogTab === 'function') window.setCatalogTab('library');
+  say(T('st.added', { name: record.title }), 'ok');
+  document.getElementById('librarySection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function chooseEntry(entry, launch = false) {
+  if (supportsFileHandles() && !(entry && entry.files && entry.files.length)) {
+    try { await pickAndRemember(entry, launch); return; }
+    catch (e) { console.warn('[library] native picker unavailable:', e); }
+  }
+  FILE.value = '';
+  FILE.dataset.target = entry ? entry.id : '';
+  FILE.dataset.launch = String(launch);
+  FILE.multiple = !!(entry && entry.files && entry.files.length);
+  FILE.click();
 }
 
 // ---------------------------------------------------------------- file handles
@@ -512,31 +572,35 @@ async function getHandle(entryId) {
 }
 
 async function forgetHandle(entryId) {
-  await idbDelete(entryId);
+  try { await idbDelete(entryId); }
+  catch (e) { console.warn('[library] remembered location could not be removed:', e); }
 }
 
 // Pick a file and remember its location. Directory games need several files, and
 // the standard picker has no folder mode, so those keep the plain picker.
-async function pickAndRemember(entry) {
+async function pickAndRemember(entry, launch = false) {
   let handle;
   try {
-    const accept = {};
-    if (!entry.files || !entry.files.length) {
-      accept['application/octet-stream'] = ['.cso', '.iso', '.pbp', '.chd'];
-    }
-    [handle] = await window.showOpenFilePicker({ multiple: false, accept });
+    [handle] = await window.showOpenFilePicker({
+      multiple: false,
+      types: [{ description: 'PSP game', accept: { 'application/octet-stream': ['.cso', '.iso', '.pbp', '.chd'] } }],
+    });
   } catch (e) {
-    if (e && (e.name === 'AbortError' || e.name === 'NotAllowedError')) return;
+    if (e && e.name === 'AbortError') return;
     throw e;
   }
   if (!handle) return;
-
-  await rememberHandle(entry.id, handle);
-  rememberedState.set(entry.id, handlePermissionCached(entry.id, 'prompt'));
-  const file = await handle.getFile();
-  const files = [file];
-  rememberSessionFiles(entry, files);
-  playSessionFiles(entry, files);
+  const files = [await handle.getFile()];
+  await libraryLoadPromise;
+  const record = acceptFiles(entry, files);
+  if (!record) return;
+  try {
+    await rememberHandle(record.id, handle);
+    rememberedState.set(record.id, 'granted');
+  } catch (e) { console.warn('[library] file location was not saved:', e); }
+  renderCollections();
+  revealLibrary(record);
+  if (launch) await playSessionFiles(record, files);
 }
 
 // Permission state per entry, refreshed on load.
@@ -570,6 +634,7 @@ async function playSessionFiles(entry, files) {
       const staged = entry.files.map((n) => [safeName(n), byName.get(n.toLowerCase())]);
       progress(85);
       await bootWith({ dir: GAME_DIR + '/' + safeName(entry.id), files: staged });
+      markPlayed(entry);
       return;
     }
 
@@ -578,6 +643,7 @@ async function playSessionFiles(entry, files) {
     const buf = new Uint8Array(await f.arrayBuffer());
     progress(85);
     await bootWith({ name: safeName(f.name), data: buf });
+    markPlayed(entry);
   } catch (e) {
     console.error('[loader] play failed:', e);
     say(T('st.loadFailed', { msg: e && e.message ? e.message : String(e) }), 'err');
@@ -665,97 +731,67 @@ async function filesFromDataTransfer(dt) {
 // Build the per-entry controls: Play on the artwork, Download and Upload stacked
 // on the right. Kept out of the tile's own click handler so each control can have
 // its own behaviour.
-function tileActions(g, tile) {
-  // Nothing is hosted, so playability depends entirely on whether the user has
-  // supplied a copy into browser storage.
-
-  // ---- Play, overlaid on the artwork
-  const play = document.createElement('button');
-  play.className = 'playbtn';
-  play.type = 'button';
-  play.innerHTML = '<span class="tri"></span><span>' + T('lib.play') + '</span>';
-  // Play, in order of preference: the file already in memory, then a remembered
-  // path on the user's disk, then ask.
-  play.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    if (bootPromise) { say(T('st.alreadyRunning'), 'warn'); return; }
-
-    if (hasSessionFile(g.id)) { playSessionFiles(g, sessionFiles.get(g.id)); return; }
-
-    if (rememberedState.has(g.id)) {
-      const handle = await getHandle(g.id);
-      if (handle) {
-        let perm = await handlePermission(handle);
-        // Re-granting needs a user gesture -- this click is one.
-        if (perm !== 'granted') perm = await requestHandlePermission(handle);
-        if (perm === 'granted') {
-          try {
-            const file = await handle.getFile();
-            const files = [file];
-            rememberSessionFiles(g, files);
-            playSessionFiles(g, files);
-            return;
-          } catch (e) {
-            console.warn('[loader] remembered file unreadable:', e);
-          }
-        }
-        // Permission withdrawn or the file moved: fall back to asking.
-        rememberedState.delete(g.id);
-      }
-    }
-
-    const canRemember = supportsFileHandles() && !(g.files && g.files.length);
-    if (canRemember) {
-      try { await pickAndRemember(g); return; } catch (err) {
-        console.error('[loader] picker failed:', err);
-      }
-    }
-
-    const picker = document.getElementById('file');
-    picker.value = '';
-    picker.dataset.target = g.id;
-    picker.multiple = !!(g.files && g.files.length);
-    picker.click();
-  });
-  artOverlay(tile, play);
-
-  // ---- Download, to the source page
+function tileActions(g, tile, owned = false) {
   const side = document.createElement('div');
   side.className = 'sideact';
+  if (owned) {
+    const play = document.createElement('button');
+    play.className = 'playbtn needs';
+    play.type = 'button';
+    play.innerHTML = '<span class="tri"></span><span>' + T(isReadyToPlay(g.id) ? 'lib.play' : 'lib.selectFile') + '</span>';
+    play.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (bootPromise) { say(T('st.alreadyRunning'), 'warn'); return; }
+      if (hasSessionFile(g.id)) { await playSessionFiles(g, sessionFiles.get(g.id)); return; }
+      if (rememberedState.has(g.id)) {
+        const handle = await getHandle(g.id);
+        if (handle) {
+          let perm = await handlePermission(handle);
+          if (perm !== 'granted') perm = await requestHandlePermission(handle);
+          if (perm === 'granted') {
+            try {
+              const files = [await handle.getFile()];
+              const record = acceptFiles(g, files);
+              if (record) await playSessionFiles(record, files);
+              return;
+            } catch (err) { console.warn('[library] remembered file unreadable:', err); }
+          }
+        }
+        rememberedState.delete(g.id);
+      }
+      await chooseEntry(g, true);
+    });
+    artOverlay(tile, play);
 
-  if (g.source) {
-    const dl = document.createElement('a');
-    dl.className = 'act';
-    dl.href = sourceUrl(g);
-    // No target="_blank". The Text Fragment is only honoured in a focused tab,
-    // so a background tab would open the listing unscrolled and unhighlighted,
-    // which defeats the entire point of this button. See sourceUrl().
-    dl.rel = 'noopener noreferrer';
-    dl.innerHTML = '<span>' + T('lib.download') + '</span>';
-    dl.title = g.source;
-    dl.addEventListener('click', (e) => e.stopPropagation());
-    side.appendChild(dl);
-  }
-
-  // Only meaningful once a path has been remembered for this entry.
-  if (rememberedState.has(g.id)) {
-    const forget = document.createElement('button');
-    forget.className = 'act del';
-    forget.type = 'button';
-    forget.innerHTML = '<span>' + T('lib.forget') + '</span>';
-    forget.title = T('lib.forgetHint');
-    forget.addEventListener('click', async (e) => {
+    const remove = document.createElement('button');
+    remove.className = 'act del';
+    remove.type = 'button';
+    remove.textContent = T('lib.remove');
+    remove.addEventListener('click', async (e) => {
       e.stopPropagation();
       await forgetHandle(g.id);
       rememberedState.delete(g.id);
       sessionFiles.delete(g.id);
-      const t2 = tile.querySelector('.playbtn');
-      if (t2) t2.classList.add('needs');
-      forget.remove();
+      ownedEntries.delete(g.id);
+      saveOwnedEntries();
+      renderCollections();
+      say(T('st.removed', { name: g.title }), 'ok');
     });
-    side.appendChild(forget);
+    side.appendChild(remove);
+  } else {
+    if (g.source) {
+      const dl = document.createElement('a');
+      dl.className = 'act'; dl.href = sourceUrl(g); dl.rel = 'noopener noreferrer';
+      dl.textContent = T('lib.download');
+      dl.addEventListener('click', (e) => e.stopPropagation());
+      side.appendChild(dl);
+    }
+    const add = document.createElement('button');
+    add.type = 'button'; add.className = 'act have';
+    add.textContent = T('lib.addToLibrary');
+    add.addEventListener('click', (e) => { e.stopPropagation(); chooseEntry(g, true); });
+    side.appendChild(add);
   }
-
   tile.querySelector('.meta').appendChild(side);
   return side;
 }
@@ -768,42 +804,51 @@ function artOverlay(tile, node) {
 // Renders the one-click library from library.json. Kept deliberately dumb: it
 // only knows how to fetch a URL and hand the bytes to runGame().
 async function loadLibrary() {
-  const grid = document.getElementById('grid');
-  if (!grid) return;
-
-  let manifest;
   try {
     const res = await fetch('library.json', { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    manifest = await res.json();
-  } catch (e) {
-    console.warn('[loader] no library manifest:', e);
-    grid.remove();
-    return;
-  }
-
-  const games = (manifest && manifest.games) || [];
-  if (!games.length) { grid.remove(); return; }
-  libraryEntries = games;
-
-  // Restore any remembered file paths and check whether we can still read them.
-  // No permission prompt here -- that has to wait for a click.
+    const manifest = await res.json();
+    libraryEntries = Array.isArray(manifest.games) ? manifest.games : [];
+  } catch (e) { console.warn('[library] public catalog unavailable:', e); }
   if (supportsFileHandles()) {
-    for (const g of games) {
-      if (g.files && g.files.length) continue;   // directory games: not handled
-      const h = await getHandle(g.id);
-      if (h) rememberedState.set(g.id, await handlePermission(h));
+    const candidates = new Map(libraryEntries.map((g) => [g.id, g]));
+    for (const g of ownedEntries.values()) candidates.set(g.id, g);
+    for (const g of candidates.values()) {
+      if (g.files && g.files.length) continue;
+      const handle = await getHandle(g.id);
+      if (!handle) continue;
+      rememberedState.set(g.id, await handlePermission(handle));
+      // Preserve games remembered by the previous single-grid version.
+      if (!ownedEntries.has(g.id)) {
+        ownedEntries.set(g.id, { id: g.id, title: g.title, subtitle: g.subtitle || '', icon: g.icon || '', badge: g.badge || 'LOCAL', fileName: handle.name, addedAt: Date.now(), lastPlayedAt: 0 });
+      }
     }
+    saveOwnedEntries();
   }
-
-  for (const g of games) {
-    grid.appendChild(libraryTile(g));
-  }
-  // Apply any active search filter to the freshly built grid.
-  if (typeof filterLibrary === 'function') filterLibrary();
+  renderCollections();
+  PICK.disabled = checkEnvironment().length > 0;
 }
 
-function libraryTile(g) {
+function renderCollections() {
+  const ownedGrid = document.getElementById('ownedGrid');
+  const publicGrid = document.getElementById('grid');
+  if (!ownedGrid || !publicGrid) return;
+  ownedGrid.replaceChildren(); publicGrid.replaceChildren();
+  const owned = Array.from(ownedEntries.values()).sort((a, b) =>
+    Math.max(b.addedAt || 0, b.lastPlayedAt || 0) - Math.max(a.addedAt || 0, a.lastPlayedAt || 0));
+  for (const g of owned) ownedGrid.appendChild(libraryTile(g, true));
+  for (const g of libraryEntries) publicGrid.appendChild(libraryTile(g, false));
+  const empty = document.getElementById('libraryEmpty');
+  if (empty) empty.hidden = owned.length !== 0;
+  const ownedCount = document.getElementById('libraryCount');
+  const publicCount = document.getElementById('publicCount');
+  if (ownedCount) ownedCount.textContent = String(owned.length);
+  if (publicCount) publicCount.textContent = String(libraryEntries.length);
+  if (typeof filterLibrary === 'function') filterLibrary();
+}
+document.addEventListener('langchange', renderCollections);
+
+function libraryTile(g, owned = false) {
   // An entry with only a link has nothing to launch here, so it must not look
   // or behave like the hosted ones -- that would promise a launch and then
   // silently do nothing.
@@ -812,9 +857,8 @@ function libraryTile(g) {
   // button semantics instead so the nesting is valid.
   const externalOnly = !g.file && !!g.link;
   const tile = document.createElement('div');
-  tile.className = 'tile' + (externalOnly ? ' ext' : '');
-  tile.setAttribute('role', 'button');
-  tile.setAttribute('tabindex', '0');
+  tile.className = 'tile' + (owned ? ' owned-tile' : ' public-tile');
+  if (owned) { tile.setAttribute('role', 'button'); tile.setAttribute('tabindex', '0'); }
 
   const initials = (g.title || '?').split(/\s+/).slice(0, 2)
     .map((w) => w[0]).join('').toUpperCase();
@@ -841,7 +885,7 @@ function libraryTile(g) {
   }
   art.appendChild(ini);
 
-  const badgeText = externalOnly ? T('lib.extBadge') : g.badge;
+  const badgeText = g.badge === 'LOCAL' ? T('lib.localBadge') : (externalOnly ? T('lib.extBadge') : g.badge);
   if (badgeText) {
     const b = document.createElement('span');
     b.className = 'badge' + (externalOnly ? ' ext' : '');
@@ -867,7 +911,7 @@ function libraryTile(g) {
   // a sibling and the tile itself is what launches.
   tile.append(art, meta);
 
-  if (g.source) {
+  if (g.source && !owned) {
     const a = document.createElement('a');
     a.className = 'srclink';
     a.href = sourceUrl(g);
@@ -889,7 +933,7 @@ function libraryTile(g) {
   tile.dataset.entry = g.id || '';
 
 if (g.id) {
-    tileActions(g, tile);
+    tileActions(g, tile, owned);
     if (isReadyToPlay(g.id)) {
       const p = tile.querySelector('.playbtn');
       if (p) p.classList.remove('needs');
@@ -912,8 +956,8 @@ if (g.id) {
     tile.classList.remove('over');
     const dropped = await filesFromDataTransfer(e.dataTransfer);
     if (!dropped.length) return;
-    rememberSessionFiles(g, dropped);
-    playSessionFiles(g, dropped);
+    const record = acceptFiles(g, dropped);
+    if (record) revealLibrary(record);
   });
 
   tile.addEventListener('keydown', (e) => {
@@ -1115,7 +1159,8 @@ function fmt(bytes) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadLibrary();
+  PICK.disabled = true;
+  libraryLoadPromise = loadLibrary();
 
   const problems = checkEnvironment();
   if (problems.length) {
@@ -1125,31 +1170,27 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  PICK.addEventListener('click', () => { FILE.dataset.target = ''; FILE.multiple = false; FILE.click(); });
+  PICK.addEventListener('click', () => chooseEntry(null, true));
   FILE.addEventListener('change', async () => {
     const files = Array.from(FILE.files || []);
-    const target = FILE.dataset.target;
     if (!files.length) return;
-
-    const entry = target ? libraryEntries.find((e) => e.id === target) : null;
-    if (!entry) {
-      // No entry chosen (the general drop area): just play it.
-      runGame(files[0]);
-      return;
-    }
-    // Remembered only for this page session; nothing is written anywhere.
-    rememberSessionFiles(entry, files);
-    playSessionFiles(entry, files);
+    await libraryLoadPromise;
+    const target = FILE.dataset.target;
+    const entry = ownedEntries.get(target) || libraryEntries.find((g) => g.id === target);
+    const record = acceptFiles(entry, files);
+    if (!record) return;
+    revealLibrary(record);
+    if (FILE.dataset.launch === 'true') await playSessionFiles(record, files);
   });
-
   ['dragenter', 'dragover'].forEach((ev) =>
     DROP.addEventListener(ev, (e) => { e.preventDefault(); DROP.classList.add('over'); }));
   ['dragleave', 'drop'].forEach((ev) =>
     DROP.addEventListener(ev, (e) => { e.preventDefault(); DROP.classList.remove('over'); }));
-
-  DROP.addEventListener('drop', (e) => {
-    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-    if (f) runGame(f);
+  DROP.addEventListener('drop', async (e) => {
+    const files = await filesFromDataTransfer(e.dataTransfer);
+    await libraryLoadPromise;
+    const record = acceptFiles(null, files);
+    if (record) revealLibrary(record);
   });
 
   window.addEventListener('gamepadconnected', () => console.log('gamepad connected'));

@@ -147,7 +147,27 @@
   .meta .sub { color:var(--muted); font-size:11.5px; margin:0;
                overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-  .drop { margin-top:26px; border:1.5px dashed #26313c; border-radius:var(--r);
+  .catalog-section { margin:0 0 30px; }
+  .catalog-tabs { display:flex; align-items:center; gap:6px; margin:0 0 20px;
+                 padding:4px; width:max-content; max-width:100%; border:1px solid var(--line);
+                 border-radius:11px; background:rgba(12,16,21,.78); }
+  .catalog-tab { display:inline-flex; align-items:center; justify-content:center; gap:8px;
+                 min-height:36px; padding:0 14px; border:1px solid transparent; border-radius:8px;
+                 background:transparent; color:var(--muted); font:600 12.5px/1 ui-sans-serif,system-ui,sans-serif;
+                 cursor:pointer; }
+  .catalog-tab:hover { color:var(--text); background:var(--surface); }
+  .catalog-tab[aria-selected="true"] { color:var(--accent); border-color:rgba(46,230,182,.25);
+                                         background:rgba(46,230,182,.09); }
+  .catalog-tab:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .catalog-tab .section-count { color:inherit; opacity:.72; }
+  .catalog-section[hidden] { display:none; }
+  .section-head { display:flex; align-items:baseline; gap:10px; margin:0 0 5px; }
+  .section-head h1 { margin:0; font-size:19px; line-height:1.3; letter-spacing:-.025em; font-weight:650; }
+  .section-count { color:var(--dim); font-size:11px; font-variant-numeric:tabular-nums; }
+  .section-hint { margin:0 0 16px; max-width:700px; color:var(--muted); font-size:12px; }
+  .library-empty { margin:0; padding:22px 18px; border:1px dashed var(--line-2); border-radius:var(--r);
+                   color:var(--muted); text-align:center; font-size:12.5px; }
+  .drop { margin-top:18px; border:1.5px dashed #26313c; border-radius:var(--r);
           padding:28px 20px; text-align:center; transition:border-color .15s, background .15s; }
   .drop.over { border-color:var(--accent); background:rgba(46,230,182,.06); }
   .drop h2 { margin:0 0 5px; font-size:15px; font-weight:600; }
@@ -236,6 +256,36 @@
              border-color:rgba(255,123,123,.34); }
   .act.del:hover { border-color:var(--red); background:rgba(255,123,123,.1); }
   .act.del:disabled { opacity:.45; cursor:progress; }
+  @media (max-width:520px) {
+    :root { --bar:136px; }
+    main { padding:17px 13px 32px; }
+    .grid { grid-template-columns:repeat(auto-fill,minmax(min(100%,145px),1fr)); gap:11px; }
+    .section-head h1 { font-size:18px; }
+    .drop { padding:23px 14px; }
+    .topbar {
+      min-height:var(--bar); height:auto; padding:7px 10px;
+      display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-rows:36px 36px 36px; gap:5px 6px;
+      grid-template-areas:
+        "brand brand settings settings"
+        "gpu gpu pad speed"
+        "search search search lang";
+    }
+    .brand { grid-area:brand; min-width:0; font-size:13px; }
+    #gpuChip { grid-area:gpu; }
+    #padChip { grid-area:pad; }
+    #speedChip { grid-area:speed; }
+    .topbar > .spacer { display:none; }
+    .searchwrap { grid-area:search; min-width:0; display:flex; }
+    #searchBox, #searchBox:focus { width:100%; }
+    #langChip { grid-area:lang; }
+    #settingsChip { grid-area:settings; }
+    .topbar > .chip { min-width:0; justify-content:center; padding:0 7px; gap:5px; }
+    .chip .k, .chip .v { min-width:0; font-size:11.5px; }
+    .chip .v { max-width:76px; }
+    #searchBox { height:34px; font-size:12px; }
+    #langChip .v { max-width:none; }
+  }
 
   /* search + language, right side of the bar */
   .searchwrap { position:relative; display:flex; align-items:center; }
@@ -263,8 +313,25 @@
   .langitem.sel { color:var(--accent); }
   .langitem .fl { font-size:15px; line-height:1; }
 
-  @media (max-width:760px) {
-    .searchwrap { display:none; }
+  @media (min-width:521px) and (max-width:1100px) {
+    :root { --bar:96px; }
+    .topbar {
+      height:auto; min-height:var(--bar); padding:7px 14px;
+      display:grid; grid-template-columns:minmax(120px,1fr) auto auto auto minmax(0,1fr) auto auto;
+      grid-template-rows:36px 36px; gap:6px 8px;
+      grid-template-areas:
+        "brand gpu pad speed . . ."
+        "search search search search search lang settings";
+    }
+    .brand { grid-area:brand; min-width:0; }
+    #gpuChip { grid-area:gpu; }
+    #padChip { grid-area:pad; }
+    #speedChip { grid-area:speed; }
+    .topbar > .spacer { display:none; }
+    .searchwrap { grid-area:search; min-width:0; }
+    #searchBox, #searchBox:focus { width:100%; }
+    #langChip { grid-area:lang; }
+    #settingsChip { grid-area:settings; }
     .brand small { display:none; }
   }
 </style>
@@ -302,17 +369,34 @@
 </header>
 
 <main>
-  <div class="grid" id="grid"></div>
-
-  <div class="drop" id="drop">
-    <h2 data-i18n="lib.openTitle">Open a game from your device</h2>
-    <p data-i18n="lib.openHint">Drag a .cso or .iso here — .cso is preferred (smaller).</p>
-    <button class="btn-primary" id="pick" data-i18n="lib.choose">Choose file</button>
-    <input type="file" id="file" accept=".cso,.iso,.pbp,.chd" hidden>
+  <div class="catalog-tabs" role="tablist" aria-label="Catalog views" data-i18n-aria="lib.catalogTabs">
+    <button class="catalog-tab" id="publicTab" type="button" role="tab" aria-controls="publicSection" aria-selected="true" tabindex="0"><span data-i18n="lib.publicTitle">Public</span><span class="section-count" id="publicCount"></span></button>
+    <button class="catalog-tab" id="libraryTab" type="button" role="tab" aria-controls="librarySection" aria-selected="false" tabindex="-1"><span data-i18n="lib.ownedTitle">Library</span><span class="section-count" id="libraryCount"></span></button>
   </div>
 
-  <progress id="bar" max="100" value="0"></progress>
-  <div class="status" id="status" data-i18n="lib.ready">Ready.</div>
+  <section class="catalog-section" id="publicSection" role="tabpanel" aria-labelledby="publicTab">
+    <div class="section-head"><h1 id="publicHeading" data-i18n="lib.publicTitle">Public</h1></div>
+    <p class="section-hint" data-i18n="lib.publicHint">Find a game, visit its source, then add your own file to Library.</p>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="catalog-section" id="librarySection" role="tabpanel" aria-labelledby="libraryTab" hidden>
+    <div class="section-head"><h1 id="libraryHeading" data-i18n="lib.ownedTitle">Library</h1></div>
+    <p class="section-hint" data-i18n="lib.ownedHint">Your added games, ready to play.</p>
+    <div class="grid" id="ownedGrid"></div>
+    <p class="library-empty" id="libraryEmpty" data-i18n="lib.ownedEmpty">Your Library is empty. Add a game file below to get started.</p>
+
+    <div class="drop" id="drop">
+      <h2 data-i18n="lib.openTitle">Choose a game to add to Library and play</h2>
+      <p data-i18n="lib.openHint">Choose a .cso, .iso, .pbp, or .chd file to add it and start playing. The file stays on your device and may need to be selected again later.</p>
+      <button class="btn-primary" id="pick" data-i18n="lib.addGame">Choose &amp; Play</button>
+      <input type="file" id="file" accept=".cso,.iso,.pbp,.chd" hidden>
+    </div>
+
+    <progress id="bar" max="100" value="0"></progress>
+    <div class="status" id="status" data-i18n="lib.ready">Ready.</div>
+  </section>
+
 
   <ul class="notes">
     <li data-i18n="lib.note1">Nothing is uploaded. Library images come from this origin; local files are read from disk. Either way the bytes go straight into the emulator.</li>
@@ -322,6 +406,40 @@
 </main>
 
 <div id="stage"><canvas id="canvas" tabindex="0"></canvas><div id="bootBadge" class="badge-idle">Idle</div></div>
+<script>
+  window.setCatalogTab = function (name) {
+    const selected = name === 'public' ? 'public' : 'library';
+    for (const key of ['library', 'public']) {
+      const active = key === selected;
+      const tab = document.getElementById(key + 'Tab');
+      const panel = document.getElementById(key + 'Section');
+      if (tab) {
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+      }
+      if (panel) panel.hidden = !active;
+    }
+  };
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabs = ['publicTab', 'libraryTab'].map((id) => document.getElementById(id)).filter(Boolean);
+    for (const tab of tabs) {
+      tab.addEventListener('click', () => window.setCatalogTab(tab.id === 'publicTab' ? 'public' : 'library'));
+      tab.addEventListener('keydown', (event) => {
+        const index = tabs.indexOf(tab);
+        let next = null;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = tabs[(index + 1) % tabs.length];
+        else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = tabs[(index + tabs.length - 1) % tabs.length];
+        else if (event.key === 'Home') next = tabs[0];
+        else if (event.key === 'End') next = tabs[tabs.length - 1];
+        if (next) {
+          event.preventDefault();
+          window.setCatalogTab(next.id === 'publicTab' ? 'public' : 'library');
+          next.focus();
+        }
+      });
+    }
+  });
+</script>
 <script src="loader.js"></script>
 <script src="i18n.js"></script>
 <script src="settings.js"></script>
